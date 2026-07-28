@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OTS Dashboard — 28 July 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+:root {
+  --navy:#0F1B35;--navy-mid:#1A2D52;--blue:#1E5FD8;--blue-light:#3B82F6;
+  --green:#10B981;--amber:#F59E0B;--red:#EF4444;--purple:#8B5CF6;
+  --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;
+  --gray-400:#94A3B8;--gray-600:#475569;--gray-800:#1E293B;--white:#FFFFFF;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.08);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.13);
+  --radius:12px;--radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-800);min-height:100vh;}
+header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);padding:28px 40px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-lg);}
+.header-left{display:flex;align-items:center;gap:16px;}
+.header-icon{width:48px;height:48px;background:var(--blue);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.header-text h1{color:var(--white);font-size:22px;font-weight:700;letter-spacing:-0.3px;}
+.header-text p{color:var(--gray-400);font-size:13px;margin-top:2px;}
+.header-badge{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:var(--white);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;}
+main{padding:32px 40px;max-width:1500px;margin:0 auto;}
+.filter-bar{background:var(--white);border-radius:var(--radius);padding:20px 28px;box-shadow:var(--shadow-sm);margin-bottom:28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.filter-bar label{font-size:13px;font-weight:600;color:var(--gray-600);display:flex;align-items:center;gap:8px;}
+.filter-bar select{border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);padding:8px 32px 8px 12px;font-size:13px;font-family:'Inter',sans-serif;font-weight:500;color:var(--gray-800);background:var(--gray-50) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394A3B8' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 10px center;appearance:none;cursor:pointer;}
+.filter-bar select:focus{outline:none;border-color:var(--blue);}
+.filter-divider{flex:1;}
+.data-info{font-size:12px;color:var(--gray-400);}
+/* KPI — 4 cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:28px;}
+.kpi-card{background:var(--white);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow-sm);border-left:4px solid transparent;}
+.kpi-card.sales{border-left-color:var(--blue);}
+.kpi-card.tickets{border-left-color:var(--green);}
+.kpi-card.cost{border-left-color:var(--amber);}
+.kpi-card.profit{border-left-color:var(--purple);}
+.kpi-label{font-size:11px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+.kpi-year-row{display:flex;gap:20px;margin-bottom:8px;}
+.kpi-year-label{font-size:11px;color:var(--gray-400);margin-bottom:2px;}
+.kpi-value{font-size:18px;font-weight:800;color:var(--gray-800);letter-spacing:-0.5px;line-height:1;}
+.kpi-diff{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;margin-top:2px;}
+.kpi-diff.positive{background:#F0FDF4;color:var(--green);}
+.kpi-diff.negative{background:#FEF2F2;color:var(--red);}
+/* Charts — 2x2 grid then full width */
+.charts-top{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+.charts-bottom{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+.chart-card{background:var(--white);border-radius:var(--radius);padding:24px 28px;box-shadow:var(--shadow-sm);}
+.chart-card.full-width{grid-column:1/-1;}
+.chart-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;}
+.chart-title{font-size:15px;font-weight:700;color:var(--gray-800);}
+.chart-subtitle{font-size:12px;color:var(--gray-400);margin-top:3px;}
+.chart-legend{display:flex;gap:14px;align-items:center;flex-shrink:0;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray-600);font-weight:500;}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.chart-wrap{position:relative;height:250px;}
+footer{text-align:center;padding:24px;color:var(--gray-400);font-size:12px;}
+@media(max-width:1024px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .charts-top,.charts-bottom{grid-template-columns:1fr;}
+}
+@media(max-width:600px){
+  main{padding:16px;}
+  header{padding:16px;flex-direction:column;gap:10px;align-items:flex-start;}
+  .kpi-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <div class="header-icon">🚌</div>
+    <div class="header-text">
+      <h1>OTS Performance Dashboard</h1>
+      <p>Online Ticketing System — Jualan, Tiket, Kos &amp; Keuntungan Bulanan</p>
+    </div>
+  </div>
+  <div class="header-badge">Dikemas kini: 28 July 2026</div>
+</header>
+
+<main>
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <label>📅 Tahun
+      <select id="filterYear">
+        <option value="all">Semua Tahun</option>
+      </select>
+    </label>
+    <label>🗓️ Bulan
+      <select id="filterMonth">
+        <option value="all">Semua Bulan</option>
+        <option value="1">Januari</option><option value="2">Februari</option>
+        <option value="3">Mac</option><option value="4">April</option>
+        <option value="5">Mei</option><option value="6">Jun</option>
+        <option value="7">Julai</option><option value="8">Ogos</option>
+        <option value="9">September</option><option value="10">Oktober</option>
+        <option value="11">November</option><option value="12">Disember</option>
+      </select>
+    </label>
+    <div class="filter-divider"></div>
+    <div class="data-info">📊 Data sehingga 28 July 2026</div>
+  </div>
+
+  <!-- KPI CARDS — 4 cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card sales"><div class="kpi-label">💳 Total OTS Sales</div><div id="kpiSales"></div></div>
+    <div class="kpi-card tickets"><div class="kpi-label">🎫 Total Tiket</div><div id="kpiTickets"></div></div>
+    <div class="kpi-card cost"><div class="kpi-label">💰 Total Kos</div><div id="kpiCost"></div></div>
+    <div class="kpi-card profit"><div class="kpi-label">📈 Nett Profit</div><div id="kpiProfit"></div></div>
+  </div>
+
+  <!-- ROW 1: Sales + Tickets -->
+  <div class="charts-top">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">Total OTS Sales</div><div class="chart-subtitle">Perbandingan jualan mengikut bulan (RM)</div></div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#1E5FD8"></div>2025</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>2026</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chartSales"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">Total Tiket</div><div class="chart-subtitle">Perbandingan bilangan tiket mengikut bulan</div></div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#1E5FD8"></div>2025</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>2026</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chartTickets"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Cost + Profit -->
+  <div class="charts-bottom">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">Kos Mengikut Bulan</div><div class="chart-subtitle">Perbandingan kos operasi mengikut bulan (RM)</div></div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>2025</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#3B82F6"></div>2026</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chartCost"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">Nett Profit Mengikut Bulan</div><div class="chart-subtitle">Perbandingan keuntungan bersih mengikut bulan (RM)</div></div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#8B5CF6"></div>2025</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#EC4899"></div>2026</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chartProfit"></canvas></div>
+    </div>
+  </div>
+</main>
+
+<footer>OTS Performance Dashboard &mdash; Data sehingga 28 July 2026</footer>
+
+<script>
+const otsRaw    = [{"MN": 1, "Year": 2025, "TicketCount": 30880, "TotalAmount": 1467214.08}, {"MN": 2, "Year": 2025, "TicketCount": 25653, "TotalAmount": 1201579.33}, {"MN": 3, "Year": 2025, "TicketCount": 37471, "TotalAmount": 2022761.08}, {"MN": 4, "Year": 2025, "TicketCount": 24213, "TotalAmount": 1108480.22}, {"MN": 5, "Year": 2025, "TicketCount": 32928, "TotalAmount": 1625012.63}, {"MN": 6, "Year": 2025, "TicketCount": 22538, "TotalAmount": 1050254.04}, {"MN": 7, "Year": 2025, "TicketCount": 23413, "TotalAmount": 1009217.3}, {"MN": 8, "Year": 2025, "TicketCount": 26437, "TotalAmount": 1157557.08}, {"MN": 9, "Year": 2025, "TicketCount": 28456, "TotalAmount": 1283332.41}, {"MN": 10, "Year": 2025, "TicketCount": 24530, "TotalAmount": 1100875.72}, {"MN": 11, "Year": 2025, "TicketCount": 18263, "TotalAmount": 819538.6}, {"MN": 12, "Year": 2025, "TicketCount": 20377, "TotalAmount": 969949.45}, {"MN": 1, "Year": 2026, "TicketCount": 10861, "TotalAmount": 512872.12}, {"MN": 2, "Year": 2026, "TicketCount": 18217, "TotalAmount": 954191.37}, {"MN": 3, "Year": 2026, "TicketCount": 16028, "TotalAmount": 827810.55}, {"MN": 4, "Year": 2026, "TicketCount": 20308, "TotalAmount": 978936.92}, {"MN": 5, "Year": 2026, "TicketCount": 19953, "TotalAmount": 1090989.05}, {"MN": 6, "Year": 2026, "TicketCount": 15050, "TotalAmount": 776194.31}];
+const costRaw   = [{"MN": 1, "Year": 2025, "TotalCost": 66951.74}, {"MN": 2, "Year": 2025, "TotalCost": 56417.12}, {"MN": 3, "Year": 2025, "TotalCost": 74824.15}, {"MN": 4, "Year": 2025, "TotalCost": 47720.98}, {"MN": 5, "Year": 2025, "TotalCost": 63248.69}, {"MN": 6, "Year": 2025, "TotalCost": 66673.74}, {"MN": 7, "Year": 2025, "TotalCost": 68571.24}, {"MN": 8, "Year": 2025, "TotalCost": 39285.77}, {"MN": 9, "Year": 2025, "TotalCost": 81019.15}, {"MN": 10, "Year": 2025, "TotalCost": 61994.21}, {"MN": 11, "Year": 2025, "TotalCost": 42970.51}, {"MN": 12, "Year": 2025, "TotalCost": 39214.27}, {"MN": 1, "Year": 2026, "TotalCost": 63714.51}, {"MN": 2, "Year": 2026, "TotalCost": 86263.33}, {"MN": 3, "Year": 2026, "TotalCost": 55880.6}, {"MN": 4, "Year": 2026, "TotalCost": 56378.29}, {"MN": 5, "Year": 2026, "TotalCost": 55888.7}, {"MN": 6, "Year": 2026, "TotalCost": 42390.61}, {"MN": 7, "Year": 2026, "TotalCost": null}, {"MN": 8, "Year": 2026, "TotalCost": null}, {"MN": 9, "Year": 2026, "TotalCost": null}, {"MN": 10, "Year": 2026, "TotalCost": null}, {"MN": 11, "Year": 2026, "TotalCost": null}, {"MN": 12, "Year": 2026, "TotalCost": null}];
+const profitRaw = [{"MN": 1, "Year": 2025, "NettProfit": 66177.51}, {"MN": 2, "Year": 2025, "NettProfit": 53785.61}, {"MN": 3, "Year": 2025, "NettProfit": 111805.0}, {"MN": 4, "Year": 2025, "NettProfit": 53022.26}, {"MN": 5, "Year": 2025, "NettProfit": 84881.41}, {"MN": 6, "Year": 2025, "NettProfit": 27601.79}, {"MN": 7, "Year": 2025, "NettProfit": 22631.87}, {"MN": 8, "Year": 2025, "NettProfit": 66212.52}, {"MN": 9, "Year": 2025, "NettProfit": 35594.44}, {"MN": 10, "Year": 2025, "NettProfit": 37341.81}, {"MN": 11, "Year": 2025, "NettProfit": 31521.93}, {"MN": 12, "Year": 2025, "NettProfit": 50061.63}, {"MN": 1, "Year": 2026, "NettProfit": 26089.35}, {"MN": 2, "Year": 2026, "NettProfit": 14296.88}, {"MN": 3, "Year": 2026, "NettProfit": 20696.04}, {"MN": 4, "Year": 2026, "NettProfit": 32116.72}, {"MN": 5, "Year": 2026, "NettProfit": 43724.11}, {"MN": 6, "Year": 2026, "NettProfit": 26813.4}, {"MN": 7, "Year": 2026, "NettProfit": null}, {"MN": 8, "Year": 2026, "NettProfit": null}, {"MN": 9, "Year": 2026, "NettProfit": null}, {"MN": 10, "Year": 2026, "NettProfit": null}, {"MN": 11, "Year": 2026, "NettProfit": null}, {"MN": 12, "Year": 2026, "NettProfit": null}];
+const ALL_YEARS = ["2025", "2026"];
+const MONTHS = ['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'];
+let chartSales, chartTickets, chartCost, chartProfit;
+
+function populateYears() {
+  const sel = document.getElementById('filterYear');
+  ALL_YEARS.forEach(y => sel.innerHTML += `<option value="${y}">${y}</option>`);
+}
+
+function getF() {
+  return {
+    year: document.getElementById('filterYear').value,
+    month: document.getElementById('filterMonth').value
+  };
+}
+
+function filterRows(rows, f) {
+  return rows.filter(r => {
+    if (f.year !== 'all' && String(r.Year) !== f.year) return false;
+    if (f.month !== 'all' && String(parseInt(r.MN || 0)) !== f.month) return false;
+    return true;
+  });
+}
+
+function aggMY(rows, key) {
+  const r = {};
+  rows.forEach(row => {
+    const mn = parseInt(row.MN || 0), yr = String(row.Year || '');
+    const v = parseFloat(row[key] || 0) || 0;
+    if (!mn || !yr) return;
+    if (!r[yr]) r[yr] = Array(12).fill(0);
+    r[yr][mn - 1] = v;
+  });
+  return r;
+}
+
+function cntMY(rows) {
+  const r = {};
+  rows.forEach(row => {
+    const mn = parseInt(row.MN || 0), yr = String(row.Year || '');
+    const v = parseInt(row.TicketCount || 0);
+    if (!mn || !yr) return;
+    if (!r[yr]) r[yr] = Array(12).fill(0);
+    r[yr][mn - 1] = v;
+  });
+  return r;
+}
+
+function fmtRM(v) {
+  const neg = v < 0;
+  const abs = Math.abs(v);
+  let s;
+  if (abs >= 1000000) s = 'RM ' + (abs/1000000).toFixed(2) + 'J';
+  else if (abs >= 1000) s = 'RM ' + (abs/1000).toFixed(1) + 'K';
+  else s = 'RM ' + abs.toFixed(0);
+  return neg ? '-' + s : s;
+}
+
+function fmtNum(v) {
+  if (v >= 1000) return (v/1000).toFixed(1) + 'K';
+  return String(Math.round(v));
+}
+
+function diffBadge(a, b) {
+  if (!a || !b) return '';
+  const p = ((b - a) / Math.abs(a) * 100).toFixed(1);
+  const cls = p >= 0 ? 'positive' : 'negative';
+  const arrow = p >= 0 ? '▲' : '▼';
+  return `<div class="kpi-diff ${cls}">${arrow} ${Math.abs(p)}% berbanding tahun lalu</div>`;
+}
+
+function profitBarColors(data) {
+  return data.map(v => v >= 0 ? '#8B5CF6' : '#EF4444');
+}
+
+function profitBarColors2(data) {
+  return data.map(v => v >= 0 ? '#EC4899' : '#F97316');
+}
+
+function makeBar(d25, d26, l25, l26, c25, c26, isCur) {
+  const c25arr = Array.isArray(c25) ? c25 : Array(12).fill(c25);
+  const c26arr = Array.isArray(c26) ? c26 : Array(12).fill(c26);
+  return {
+    type: 'bar',
+    data: {
+      labels: MONTHS,
+      datasets: [
+        { label: l25, data: d25, backgroundColor: c25arr, borderRadius: 4, borderSkipped: false },
+        { label: l26, data: d26, backgroundColor: c26arr, borderRadius: 4, borderSkipped: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ' ' + ctx.dataset.label + ': ' + (isCur ? fmtRM(ctx.parsed.y) : fmtNum(ctx.parsed.y)) } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#94A3B8' } },
+        y: {
+          grid: { color: '#F1F5F9' },
+          ticks: {
+            font: { size: 11 }, color: '#94A3B8',
+            callback: v => isCur ? (v >= 1000000 ? (v/1000000).toFixed(1)+'J' : v >= 1000 ? (v/1000).toFixed(0)+'K' : v < -1000 ? '-'+(Math.abs(v)/1000).toFixed(0)+'K' : v) : (v >= 1000 ? (v/1000).toFixed(0)+'K' : v)
+          }
+        }
+      }
+    }
+  };
+}
+
+function renderAll() {
+  const f = getF();
+  const otsFilt    = filterRows(otsRaw, f);
+  const costFilt   = filterRows(costRaw, f);
+  const profitFilt = filterRows(profitRaw, f);
+
+  // KPI totals
+  const salesByYr = {}, ticketsByYr = {}, costByYr = {}, profitByYr = {};
+  otsFilt.forEach(r => {
+    const yr = String(r.Year || '');
+    salesByYr[yr]   = (salesByYr[yr]   || 0) + (parseFloat(r.TotalAmount  || 0) || 0);
+    ticketsByYr[yr] = (ticketsByYr[yr] || 0) + (parseInt(r.TicketCount    || 0) || 0);
+  });
+  costFilt.forEach(r => {
+    const yr = String(r.Year || '');
+    costByYr[yr] = (costByYr[yr] || 0) + (parseFloat(r.TotalCost || 0) || 0);
+  });
+  profitFilt.forEach(r => {
+    const yr = String(r.Year || '');
+    profitByYr[yr] = (profitByYr[yr] || 0) + (parseFloat(r.NettProfit || 0) || 0);
+  });
+
+  const yrs = ALL_YEARS;
+  const y25 = yrs.find(y => y === '2025') || yrs[0];
+  const y26 = yrs.find(y => y === '2026') || yrs[1];
+
+  const kpiRow = (y, val, fmt) => y ? `<div><div class="kpi-year-label">${y}</div><div class="kpi-value">${fmt(val||0)}</div></div>` : '';
+
+  document.getElementById('kpiSales').innerHTML =
+    `<div class="kpi-year-row">${kpiRow(y25,salesByYr[y25],fmtRM)}${kpiRow(y26,salesByYr[y26],fmtRM)}</div>
+     ${y25&&y26?diffBadge(salesByYr[y25],salesByYr[y26]):''}`;
+
+  document.getElementById('kpiTickets').innerHTML =
+    `<div class="kpi-year-row">${kpiRow(y25,ticketsByYr[y25],fmtNum)}${kpiRow(y26,ticketsByYr[y26],fmtNum)}</div>
+     ${y25&&y26?diffBadge(ticketsByYr[y25],ticketsByYr[y26]):''}`;
+
+  document.getElementById('kpiCost').innerHTML =
+    `<div class="kpi-year-row">${kpiRow(y25,costByYr[y25],fmtRM)}${kpiRow(y26,costByYr[y26],fmtRM)}</div>
+     ${y25&&y26?diffBadge(costByYr[y25],costByYr[y26]):''}`;
+
+  document.getElementById('kpiProfit').innerHTML =
+    `<div class="kpi-year-row">${kpiRow(y25,profitByYr[y25],fmtRM)}${kpiRow(y26,profitByYr[y26],fmtRM)}</div>
+     ${y25&&y26?diffBadge(profitByYr[y25],profitByYr[y26]):''}`;
+
+  // Chart data
+  const sMY  = aggMY(otsFilt,    'TotalAmount');
+  const tMY  = cntMY(otsFilt);
+  const cMY  = aggMY(costFilt,   'TotalCost');
+  const pMY  = aggMY(profitFilt, 'NettProfit');
+
+  const s25 = sMY[y25]||Array(12).fill(0);
+  const s26 = sMY[y26]||Array(12).fill(0);
+  const t25 = tMY[y25]||Array(12).fill(0);
+  const t26 = tMY[y26]||Array(12).fill(0);
+  const c25 = cMY[y25]||Array(12).fill(0);
+  const c26 = cMY[y26]||Array(12).fill(0);
+  const p25 = pMY[y25]||Array(12).fill(0);
+  const p26 = pMY[y26]||Array(12).fill(0);
+
+  if (chartSales)   chartSales.destroy();
+  if (chartTickets) chartTickets.destroy();
+  if (chartCost)    chartCost.destroy();
+  if (chartProfit)  chartProfit.destroy();
+
+  chartSales   = new Chart(document.getElementById('chartSales'),   makeBar(s25,s26,y25,y26,'#1E5FD8','#10B981',true));
+  chartTickets = new Chart(document.getElementById('chartTickets'), makeBar(t25,t26,y25,y26,'#1E5FD8','#10B981',false));
+  chartCost    = new Chart(document.getElementById('chartCost'),    makeBar(c25,c26,y25,y26,'#F59E0B','#3B82F6',true));
+  chartProfit  = new Chart(document.getElementById('chartProfit'),  makeBar(p25,p26,y25,y26,profitBarColors(p25),profitBarColors2(p26),true));
+}
+
+populateYears();
+document.getElementById('filterYear').addEventListener('change', renderAll);
+document.getElementById('filterMonth').addEventListener('change', renderAll);
+renderAll();
+</script>
+</body>
+</html>
