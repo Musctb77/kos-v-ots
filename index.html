@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETSB Dashboard — 17 September 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+:root{
+  --navy:#0F1B35;--navy-mid:#1A2D52;--blue:#1E5FD8;
+  --green:#10B981;--amber:#F59E0B;--red:#EF4444;--purple:#8B5CF6;
+  --teal:#0D9488;--indigo:#6366F1;--pink:#EC4899;--orange:#F97316;
+  --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;
+  --gray-400:#94A3B8;--gray-600:#475569;--gray-800:#1E293B;--white:#FFFFFF;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.08);--shadow-md:0 4px 16px rgba(0,0,0,0.10);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.13);--radius:12px;--radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-800);min-height:100vh;}
+
+/* HEADER */
+header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);padding:24px 40px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-lg);}
+.header-left{display:flex;align-items:center;gap:16px;}
+.header-icon{width:44px;height:44px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.header-text h1{color:var(--white);font-size:20px;font-weight:700;letter-spacing:-0.3px;}
+.header-text p{color:var(--gray-400);font-size:12px;margin-top:2px;}
+.header-badge{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:var(--white);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;}
+
+/* MAIN */
+main{padding:28px 40px;max-width:1600px;margin:0 auto;}
+
+/* FILTER */
+.filter-bar{background:var(--white);border-radius:var(--radius);padding:16px 24px;box-shadow:var(--shadow-sm);margin-bottom:28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.filter-bar label{font-size:13px;font-weight:600;color:var(--gray-600);display:flex;align-items:center;gap:8px;}
+.filter-bar select{border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);padding:8px 32px 8px 12px;font-size:13px;font-family:'Inter',sans-serif;font-weight:500;color:var(--gray-800);background:var(--gray-50) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394A3B8' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 10px center;appearance:none;cursor:pointer;transition:border-color 0.2s;}
+.filter-bar select:focus{outline:none;border-color:var(--blue);}
+.filter-info{margin-left:auto;font-size:12px;color:var(--gray-400);background:var(--gray-50);padding:6px 12px;border-radius:20px;border:1px solid var(--gray-200);}
+
+/* SECTION */
+.section-block{margin-bottom:28px;}
+.section-title{font-size:12px;font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:0.8px;padding:6px 14px;border-radius:6px;display:inline-block;margin-bottom:12px;}
+.section-title.s1{background:var(--teal);}
+.section-title.s2{background:var(--indigo);}
+.section-title.s3{background:var(--amber);}
+.section-title.s4{background:var(--purple);}
+
+/* KPI GRIDS */
+.kpi-grid-1{display:grid;grid-template-columns:repeat(1,minmax(0,360px));gap:16px;}
+.kpi-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.kpi-grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
+.kpi-grid-1p{display:grid;grid-template-columns:repeat(1,minmax(0,360px));gap:16px;}
+
+/* KPI CARD */
+.kpi-card{background:var(--white);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow-sm);border-left:4px solid transparent;transition:box-shadow 0.2s;}
+.kpi-card:hover{box-shadow:var(--shadow-md);}
+.kpi-card.c-teal{border-left-color:var(--teal);}
+.kpi-card.c-indigo{border-left-color:var(--indigo);}
+.kpi-card.c-blue{border-left-color:var(--blue);}
+.kpi-card.c-orange{border-left-color:var(--orange);}
+.kpi-card.c-amber{border-left-color:var(--amber);}
+.kpi-card.c-red{border-left-color:var(--red);}
+.kpi-card.c-pink{border-left-color:var(--pink);}
+.kpi-card.c-green{border-left-color:var(--green);}
+.kpi-card.c-purple{border-left-color:var(--purple);}
+.kpi-label{font-size:10px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.kpi-cur-label{font-size:10px;color:var(--gray-400);margin-bottom:4px;font-weight:500;}
+.kpi-value{font-size:20px;font-weight:800;color:var(--gray-800);letter-spacing:-0.5px;line-height:1.1;margin-bottom:8px;}
+.kpi-diff{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;margin-bottom:6px;}
+.kpi-diff.positive{background:#F0FDF4;color:var(--green);}
+.kpi-diff.negative{background:#FEF2F2;color:var(--red);}
+.kpi-prev{font-size:10px;color:var(--gray-400);margin-bottom:6px;}
+.kpi-avg{margin-top:8px;padding-top:8px;border-top:1px solid var(--gray-200);}
+.kpi-avg-label{font-size:9px;color:var(--gray-400);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:2px;}
+.kpi-avg-item .avg-val{font-size:12px;font-weight:700;color:var(--gray-600);}
+
+/* CHARTS */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+.chart-card{background:var(--white);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow-sm);}
+.chart-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px;}
+.chart-title{font-size:14px;font-weight:700;color:var(--gray-800);}
+.chart-subtitle{font-size:11px;color:var(--gray-400);margin-top:2px;}
+.chart-legend{display:flex;gap:12px;align-items:center;flex-shrink:0;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--gray-600);font-weight:500;}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.chart-wrap{position:relative;height:240px;}
+.section-divider{height:1px;background:var(--gray-200);margin:0 0 24px;}
+footer{text-align:center;padding:20px;color:var(--gray-400);font-size:11px;}
+
+/* RESPONSIVE */
+@media(max-width:1200px){.kpi-grid-5{grid-template-columns:repeat(3,1fr);}.kpi-grid-3{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:900px){.kpi-grid-5,.kpi-grid-3{grid-template-columns:repeat(2,1fr);}.charts-row{grid-template-columns:1fr;}}
+@media(max-width:600px){main{padding:16px;}header{padding:16px;flex-wrap:wrap;gap:10px;}.kpi-grid-5,.kpi-grid-3,.kpi-grid-1{grid-template-columns:1fr;}.charts-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <div class="header-icon">🚌</div>
+    <div class="header-text">
+      <h1>ETSB Dashboard</h1>
+      <p>Revenue, Kos &amp; Keuntungan Bulanan — 17 September 2026</p>
+    </div>
+  </div>
+  <div class="header-badge" id="headerBadge">Dikemas kini: 17 September 2026</div>
+</header>
+
+<main>
+  <!-- FILTER -->
+  <div class="filter-bar">
+    <label>📅 Tahun
+      <select id="filterYear">
+        <option value="all">Semua Tahun</option>
+      </select>
+    </label>
+    <label>🗓️ Bulan
+      <select id="filterMonth">
+        <option value="all">Semua Bulan</option>
+        <option value="1">Januari</option><option value="2">Februari</option>
+        <option value="3">Mac</option><option value="4">April</option>
+        <option value="5">Mei</option><option value="6">Jun</option>
+        <option value="7">Julai</option><option value="8">Ogos</option>
+        <option value="9">September</option><option value="10">Oktober</option>
+        <option value="11">November</option><option value="12">Disember</option>
+      </select>
+    </label>
+    <div class="filter-info" id="filterInfo">📊 Semua data • 17 September 2026</div>
+  </div>
+
+  <!-- LINE 1: eTicketing.my Revenue -->
+  <div class="section-block">
+    <div class="section-title s1">eTicketing.my Revenue</div>
+    <div class="kpi-grid-1">
+      <div class="kpi-card c-teal"><div class="kpi-label">💳 eTicketing.my Revenue</div><div id="kpiOTSRev"></div></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- LINE 2: STV5 Revenue -->
+  <div class="section-block">
+    <div class="section-title s2">STV5 Revenue</div>
+    <div class="kpi-grid-3">
+      <div class="kpi-card c-indigo"><div class="kpi-label">🌐 Web V5 Revenue</div><div id="kpiWebRev"></div></div>
+      <div class="kpi-card c-blue"><div class="kpi-label">🔌 OTA API Revenue</div><div id="kpiAPI"></div></div>
+      <div class="kpi-card c-orange"><div class="kpi-label">🏢 System Rental</div><div id="kpiRental"></div></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- LINE 3: Cost -->
+  <div class="section-block">
+    <div class="section-title s3">Cost</div>
+    <div class="kpi-grid-5">
+      <div class="kpi-card c-amber"><div class="kpi-label">🏷️ Discount</div><div id="kpiDiscount"></div></div>
+      <div class="kpi-card c-red"><div class="kpi-label">💳 MDR</div><div id="kpiMDR"></div></div>
+      <div class="kpi-card c-pink"><div class="kpi-label">🧾 SST 6%</div><div id="kpiSST"></div></div>
+      <div class="kpi-card c-green"><div class="kpi-label">📱 Google Ads</div><div id="kpiGoogleAds"></div></div>
+      <div class="kpi-card c-blue"><div class="kpi-label">📣 Branding Ads</div><div id="kpiBrandAds"></div></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- LINE 4: Profit -->
+  <div class="section-block">
+    <div class="section-title s4">Profit</div>
+    <div class="kpi-grid-1">
+      <div class="kpi-card c-purple"><div class="kpi-label">📈 Nett Profit</div><div id="kpiProfit"></div></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- CHARTS ROW 1: Sales + Tickets -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">eTicketing.my Sales</div><div class="chart-subtitle">Jualan tiket online mengikut bulan (RM)</div></div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#1E5FD8"></div>2025</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>2026</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chartSales"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">Total Tiket</div><div class="chart-subtitle">Bilangan tiket mengikut bulan</div></div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#1E5FD8"></div>2025</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>2026</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chartTickets"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 2: Revenue + Cost -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">Total Revenue</div><div class="chart-subtitle">eTicketing.my + Web V5 + API + Rental (RM)</div></div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#0D9488"></div>2025</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#2DD4BF"></div>2026</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chartRevenue"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">Total Kos</div><div class="chart-subtitle">Kos operasi mengikut bulan (RM)</div></div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>2025</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#3B82F6"></div>2026</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chartCost"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 3: API + Profit -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">API Fees + RB Refund</div><div class="chart-subtitle">Jumlah API keseluruhan mengikut bulan (RM)</div></div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#0D9488"></div>2025</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#2DD4BF"></div>2026</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chartApi"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">Nett Profit</div><div class="chart-subtitle">Revenue - Kos mengikut bulan (RM)</div></div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#8B5CF6"></div>2025</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#EC4899"></div>2026</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chartProfit"></canvas></div>
+    </div>
+  </div>
+
+</main>
+<footer>ETSB Dashboard &mdash; Data sehingga 17 September 2026</footer>
+
+<script>
+const DATA = {
+  sales:     {"2025": [1463722.04, 1198158.51, 2019361.36, 1105464.7, 1621259.83, 1046836.18, 1006085.86, 1154238.28, 1278631.23, 1096932.74, 817317.42, 971877.81], "2026": [982422.92, 1097338.13, 821205.12, 972871.0, 1085080.91, 771613.83, 902861.77, 1108046.53, 0.0, 0.0, 0.0, 0.0]},
+  tickets:   {"2025": [30847.0, 25608.0, 37436.0, 24213.0, 32925.0, 22538.0, 23413.0, 26437.0, 28456.0, 24548.0, 18316.0, 20540.0], "2026": [20808.0, 21228.0, 16029.0, 20308.0, 19953.0, 15049.0, 16485.0, 18172.0, 0.0, 0.0, 0.0, 0.0]},
+  otsRev:    {"2025": [119367.41, 98016.58, 169470.06, 90356.91, 133799.63, 84463.74, 81178.89, 94513.97, 104875.87, 88775.18, 66531.53, 80517.72], "2026": [80695.14, 91122.47, 69368.66, 79605.36, 90730.22, 62381.27, 73069.6, 92774.08, 0.0, 0.0, 0.0, 0.0]},
+  webRev:    {"2025": [24560.03, 18252.24, 35709.9, 23346.52, 30633.7, 16618.92, 19422.02, 22673.14, 20819.33, 17516.32, 16889.81, 26520.22], "2026": [25205.98, 26606.67, 21767.47, 26695.7, 28086.24, 21114.98, 25133.68, 30155.05, 0.0, 0.0, 0.0, 0.0]},
+  api:       {"2025": [344578.12, 257491.41, 255290.27, 265775.01, 358933.69999999995, 257635.42, 271593.55, 292166.69, 322213.56, 326076.15, 315565.5, 393758.6], "2026": [350663.94, 380245.63, 345199.67, 333462.2, 455059.23, 324456.08, 384729.38, 442341.0, 0.0, 0.0, 0.0, 0.0]},
+  rental:    {"2025": [15000, 15000, 15000, 15000, 15000, 15000, 15000, 15000, 15000, 15000, 15000, 15000], "2026": [15000, 15000, 15000, 15000, 15000, 15000, 15000, 15000, 0, 0, 0, 0]},
+  discount:  {"2025": [2176.5, 0.0, 1700.6, 238.0, 2134.0, 1461.66, 1550.04, 2280.7, 3685.08, 3139.58, 2216.48, 2970.44], "2026": [4158.2, 3437.34, 4773.53, 3858.82, 4317.24, 3323.08, 7692.41, 9990.16, 0.0, 0.0, 0.0, 0.0]},
+  mdr:       {"2025": [13761.84, 12186.15, 17159.09, 10367.33, 14330.47, 9811.79, 10024.22, 10984.32, 11737.72, 10560.84, 7960.91, 8758.18], "2026": [9108.72, 9437.74, 7207.98, 8889.65, 8882.59, 6822.74, 7623.16, 8350.44, 0.0, 0.0, 0.0, 0.0]},
+  sst:       {"2025": [6633.45, 5548.11, 9496.38, 5102.15, 7452.77, 4698.23, 4507.29, 5220.75, 5727.78, 4847.3, 3640.47, 4389.47], "2026": [4332.28, 4963.31, 3656.33, 4287.54, 4891.3, 3342.92, 3700.6, 4685.88, 0.0, 0.0, 0.0, 0.0]},
+  googleAds: {"2025": [44379.95, 38682.86, 46468.08, 32013.5, 39331.45, 50702.06, 52489.69, 20800.0, 59868.57, 43446.49, 27480.28, 20276.29], "2026": [32557.84, 50008.27, 36371.0, 34287.66, 31930.5, 24700.68, 30641.4, 36832.93, 0.0, 0.0, 0.0, 0.0]},
+  brandAds:  {"2025": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1672.37, 2819.89], "2026": [13557.47, 18416.67, 3871.76, 5054.62, 5867.07, 4201.19, 8284.79, 13006.69, 0.0, 0.0, 0.0, 0.0]},
+  totalCost: {"2025": [66951.74, 56417.12, 74824.15, 47720.98, 63248.69, 66673.74, 68571.24, 39285.77, 81019.15, 61994.21, 42970.51, 39214.27], "2026": [63714.51, 86263.33, 55880.6, 56378.29, 55888.7, 42390.61, 57942.36, 72866.1, 0.0, 0.0, 0.0, 0.0]},
+  totalRev:  {"2025": [503505.56, 388760.23, 475470.23, 394478.44, 538367.03, 373718.08, 387194.45999999996, 424353.8, 462908.76, 447367.65, 413986.83999999997, 515796.54], "2026": [471565.06, 512974.77, 451335.8, 454763.26, 588875.69, 422952.33, 497932.66000000003, 580270.13, 0, 0, 0, 0]},
+  profit:    {"2025": [436553.82, 332343.11, 400646.07999999996, 346757.46, 475118.34, 307044.34, 318623.22, 385068.02999999997, 381889.61, 385373.44, 371016.32999999996, 476582.26999999996], "2026": [407850.55, 426711.44, 395455.2, 398384.97000000003, 532986.99, 380561.72000000003, 439990.30000000005, 507404.03, 0, 0, 0, 0]}
+};
+const ALL_YEARS   = ["2025", "2026"];
+const MONTHS      = ['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'];
+const MONTH_NAMES = ['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'];
+const DAYS        = [31,28,31,30,31,30,31,31,30,31,30,31];
+let charts = {};
+
+function populateYears() {
+  const sel = document.getElementById('filterYear');
+  ALL_YEARS.forEach(y => sel.innerHTML += `<option value="${y}">${y}</option>`);
+}
+
+function getF() {
+  return {
+    year:  document.getElementById('filterYear').value,
+    month: document.getElementById('filterMonth').value
+  };
+}
+
+function getYr(f) {
+  return f.year !== 'all' ? f.year : (ALL_YEARS[ALL_YEARS.length-1] || '');
+}
+
+function filterTotal(dataObj, f) {
+  const yr  = getYr(f);
+  const arr = dataObj[yr] || Array(12).fill(0);
+  if (f.month !== 'all') return arr[parseInt(f.month)-1] || 0;
+  return arr.reduce((a,b) => a+b, 0);
+}
+
+function chartArr(dataObj, f) {
+  const result = {};
+  Object.keys(dataObj).forEach(yr => {
+    if (f.year !== 'all' && yr !== f.year) return;
+    if (f.month !== 'all') {
+      const arr = Array(12).fill(0);
+      arr[parseInt(f.month)-1] = dataObj[yr][parseInt(f.month)-1] || 0;
+      result[yr] = arr;
+    } else {
+      result[yr] = dataObj[yr];
+    }
+  });
+  return result;
+}
+
+function getPrevValue(dataObj, f) {
+  const yr = getYr(f);
+  if (f.month !== 'all') {
+    const mn = parseInt(f.month);
+    if (mn === 1) return (dataObj[String(parseInt(yr)-1)] || Array(12).fill(0))[11];
+    return (dataObj[yr] || Array(12).fill(0))[mn-2];
+  }
+  return (dataObj[String(parseInt(yr)-1)] || Array(12).fill(0)).reduce((a,b)=>a+b,0);
+}
+
+function getPrevLabel(f) {
+  const yr = getYr(f);
+  if (f.month !== 'all') {
+    const mn = parseInt(f.month);
+    if (mn === 1) return `Dis ${parseInt(yr)-1}`;
+    return `${MONTH_NAMES[mn-2]} ${yr}`;
+  }
+  return `Tahun ${parseInt(yr)-1}`;
+}
+
+function getCurLabel(f) {
+  const yr = getYr(f);
+  if (f.month !== 'all') return `${MONTH_NAMES[parseInt(f.month)-1]} ${yr}`;
+  return `Tahun ${yr}`;
+}
+
+function fmtRM(v) {
+  const neg = v < 0, a = Math.abs(v);
+  return (neg?'-':'') + 'RM ' + a.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function fmtNum(v) {
+  const neg = v < 0, a = Math.abs(v);
+  return (neg?'-':'') + a.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function diffBlock(cur, prev, fmt) {
+  if (!prev) return '';
+  const diff = cur - prev;
+  const pct  = (diff / Math.abs(prev) * 100).toFixed(1);
+  const isUp = diff >= 0;
+  return `<div class="kpi-diff ${isUp?'positive':'negative'}">${isUp?'▲':'▼'} ${Math.abs(pct)}% &nbsp;|&nbsp; ${isUp?'+':''}${fmt(diff)}</div>`;
+}
+
+function avgBlock(cur, dataObj, f, fmt) {
+  const yr  = getYr(f);
+  const div = f.month !== 'all'
+    ? DAYS[parseInt(f.month)-1]
+    : (dataObj[yr]||[]).filter(v=>v>0).length || 1;
+  const lbl = f.month !== 'all' ? 'Purata / Hari' : 'Purata / Bulan';
+  return `<div class="kpi-avg"><div class="kpi-avg-label">⌀ ${lbl}</div><div class="kpi-avg-item"><span class="avg-val">${fmt(cur/div)}</span></div></div>`;
+}
+
+function kpiHTML(dataObj, f, fmt) {
+  const cur  = filterTotal(dataObj, f);
+  const prev = getPrevValue(dataObj, f);
+  return `
+    <div class="kpi-cur-label">${getCurLabel(f)}</div>
+    <div class="kpi-value">${fmt(cur)}</div>
+    ${diffBlock(cur, prev, fmt)}
+    <div class="kpi-prev">vs ${getPrevLabel(f)}: ${fmt(prev)}</div>
+    ${avgBlock(cur, dataObj, f, fmt)}`;
+}
+
+function updateFilterInfo(f) {
+  let txt = '📊 ';
+  if (f.year==='all'&&f.month==='all') txt+='Semua data';
+  else if (f.year!=='all'&&f.month==='all') txt+=`Tahun ${f.year}`;
+  else if (f.year==='all'&&f.month!=='all') txt+=`${MONTH_NAMES[parseInt(f.month)-1]} — Semua Tahun`;
+  else txt+=`${MONTH_NAMES[parseInt(f.month)-1]} ${f.year}`;
+  txt += ' • 17 September 2026';
+  document.getElementById('filterInfo').textContent = txt;
+}
+
+function pColors(arr,c1,c2){ return arr.map(v=>v>=0?c1:c2); }
+
+function makeBar(d25,d26,l25,l26,c25,c26,isCur) {
+  const ca = a => Array.isArray(a)?a:Array(12).fill(a);
+  return {
+    type:'bar',
+    data:{labels:MONTHS,datasets:[
+      {label:l25,data:d25,backgroundColor:ca(c25),borderRadius:4,borderSkipped:false},
+      {label:l26,data:d26,backgroundColor:ca(c26),borderRadius:4,borderSkipped:false}
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.dataset.label+': '+(isCur?fmtRM(ctx.parsed.y):fmtNum(ctx.parsed.y))}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:11},color:'#94A3B8'}},
+        y:{grid:{color:'#F1F5F9'},ticks:{font:{size:11},color:'#94A3B8',
+          callback:v=>{
+            const a=Math.abs(v),neg=v<0?'-':'';
+            if(isCur) return a>=1000000?neg+'RM '+(a/1000000).toFixed(2)+'J':a>=1000?neg+'RM '+(a/1000).toFixed(0)+'K':neg+'RM '+a.toFixed(0);
+            return a>=1000?neg+(a/1000).toFixed(1)+'K':String(Math.round(v));
+          }
+        }}
+      }
+    }
+  };
+}
+
+function renderAll() {
+  const f   = getF();
+  const y25 = ALL_YEARS.find(y=>y==='2025')||ALL_YEARS[0];
+  const y26 = ALL_YEARS.find(y=>y==='2026')||ALL_YEARS[1];
+
+  updateFilterInfo(f);
+
+  // LINE 1 — eTicketing.my Revenue
+  document.getElementById('kpiOTSRev').innerHTML   = kpiHTML(DATA.otsRev,    f, fmtRM);
+
+  // LINE 2 — STV5 Revenue
+  document.getElementById('kpiWebRev').innerHTML   = kpiHTML(DATA.webRev,    f, fmtRM);
+  document.getElementById('kpiAPI').innerHTML      = kpiHTML(DATA.api,       f, fmtRM);
+  document.getElementById('kpiRental').innerHTML   = kpiHTML(DATA.rental,    f, fmtRM);
+
+  // LINE 3 — Cost
+  document.getElementById('kpiDiscount').innerHTML = kpiHTML(DATA.discount,  f, fmtRM);
+  document.getElementById('kpiMDR').innerHTML      = kpiHTML(DATA.mdr,       f, fmtRM);
+  document.getElementById('kpiSST').innerHTML      = kpiHTML(DATA.sst,       f, fmtRM);
+  document.getElementById('kpiGoogleAds').innerHTML= kpiHTML(DATA.googleAds, f, fmtRM);
+  document.getElementById('kpiBrandAds').innerHTML = kpiHTML(DATA.brandAds,  f, fmtRM);
+
+  // LINE 4 — Profit
+  document.getElementById('kpiProfit').innerHTML   = kpiHTML(DATA.profit,    f, fmtRM);
+
+  // Charts
+  const ca = {};
+  ['sales','tickets','totalRev','totalCost','api','profit'].forEach(k => ca[k]=chartArr(DATA[k],f));
+  const g  = (k,yr) => ca[k][yr]||Array(12).fill(0);
+
+  Object.values(charts).forEach(c=>c.destroy());
+
+  charts.sales   = new Chart(document.getElementById('chartSales'),   makeBar(g('sales',y25),g('sales',y26),y25,y26,'#1E5FD8','#10B981',true));
+  charts.tickets = new Chart(document.getElementById('chartTickets'), makeBar(g('tickets',y25),g('tickets',y26),y25,y26,'#1E5FD8','#10B981',false));
+  charts.revenue = new Chart(document.getElementById('chartRevenue'), makeBar(g('totalRev',y25),g('totalRev',y26),y25,y26,'#0D9488','#2DD4BF',true));
+  charts.cost    = new Chart(document.getElementById('chartCost'),    makeBar(g('totalCost',y25),g('totalCost',y26),y25,y26,'#F59E0B','#3B82F6',true));
+  charts.api     = new Chart(document.getElementById('chartApi'),     makeBar(g('api',y25),g('api',y26),y25,y26,'#0D9488','#2DD4BF',true));
+  charts.profit  = new Chart(document.getElementById('chartProfit'),  makeBar(g('profit',y25),g('profit',y26),y25,y26,pColors(g('profit',y25),'#8B5CF6','#EF4444'),pColors(g('profit',y26),'#EC4899','#F97316'),true));
+}
+
+populateYears();
+document.getElementById('filterYear').addEventListener('change', renderAll);
+document.getElementById('filterMonth').addEventListener('change', renderAll);
+renderAll();
+</script>
+</body>
+</html>
